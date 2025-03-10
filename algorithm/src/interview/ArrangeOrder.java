@@ -1,8 +1,6 @@
 package interview;
 
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.PriorityQueue;
+import java.util.*;
 
 public class ArrangeOrder {
 
@@ -200,5 +198,168 @@ public class ArrangeOrder {
         int target = n / 2; // 这里返回的是上中位数
         return quickSelect(nums, 0, n - 1, target);
     }
+
+    // 148. 排序链表
+    class ListNode {
+        int val;
+        ListNode next;
+        ListNode() {}
+        ListNode(int val) { this.val = val; }
+        ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+    }
+
+    public ListNode sortList(ListNode head) {
+        if (head == null || head.next == null) {
+            return head;
+        }
+        ArrayList<ListNode> list = new ArrayList<>();
+        while (head != null) {
+            list.add(head);
+            head = head.next;
+        }
+        Collections.sort(list, new Comparator<ListNode>() {
+
+            @Override
+            public int compare(ListNode o1, ListNode o2) {
+                return Integer.compare(o1.val, o2.val);
+            }
+        });
+        head = list.get(0);
+        ListNode pre = head;
+        for (int i = 1; i < list.size(); i++) {
+            pre.next = list.get(i);
+            pre = pre.next;
+        }
+        pre.next = null;
+        return head;
+    }
+    // 进阶 归并O（nlogn）
+    public ListNode sortList2(ListNode head) {
+        if (head == null || head.next == null) {
+            return head;
+        }
+
+        // 1. 找到链表的中点（使用快慢指针）
+        ListNode mid = getMiddle(head);
+        ListNode rightHead = mid.next;
+        mid.next = null; // 断开链表
+
+        // 2. 递归排序左右两部分
+        ListNode left = sortList(head);
+        ListNode right = sortList(rightHead);
+
+        // 3. 归并两个有序链表
+        return merge(left, right);
+    }
+
+    // 快慢指针找到中点（快指针走两步，慢指针走一步）
+    private ListNode getMiddle(ListNode head) {
+        ListNode slow = head, fast = head.next;
+        while (fast != null && fast.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        return slow;
+    }
+
+    // 归并两个有序链表
+    private ListNode merge(ListNode l1, ListNode l2) {
+        ListNode dummy = new ListNode(0);
+        ListNode cur = dummy;
+
+        while (l1 != null && l2 != null) {
+            if (l1.val < l2.val) {
+                cur.next = l1;
+                l1 = l1.next;
+            } else {
+                cur.next = l2;
+                l2 = l2.next;
+            }
+            cur = cur.next;
+        }
+
+        // 连接剩余部分
+        if (l1 != null) cur.next = l1;
+        if (l2 != null) cur.next = l2;
+
+        return dummy.next;
+    }
+
+    // 最小的k个数
+    public ArrayList<Integer> GetLeastNumbers_Solution (int[] input, int k) {
+        // write code here
+        PriorityQueue<Integer> pq = new PriorityQueue<>((a, b) -> b - a);
+        for (int i : input) {
+            if (pq.size() < k) {
+                pq.add(i);
+            }else {
+                if (!pq.isEmpty() && pq.peek() > i) {
+                    pq.poll();
+                    pq.add(i);
+                }
+            }
+        }
+        ArrayList<Integer> res = new ArrayList<>();
+        while (!pq.isEmpty()) {
+            res.add(pq.poll());
+        }
+        return res;
+    }
+    // 347. 前K 个高频元素
+    public int[] topKFrequent(int[] nums, int k) {
+        // 1. 统计每个数字的频率
+        Map<Integer, Integer> map = new HashMap<>();
+        for (int num : nums) {
+            map.put(num, map.getOrDefault(num, 0) + 1);
+        }
+
+        // 2. 使用小根堆，维护 K 个高频元素
+        PriorityQueue<Map.Entry<Integer, Integer>> pq =
+                new PriorityQueue<>(Comparator.comparingInt(Map.Entry::getValue));
+
+        // 3. 遍历哈希表，维护前 K 个高频元素
+        for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
+            if (pq.size() < k) {
+                pq.add(entry);
+            } else if (pq.peek().getValue() < entry.getValue()) {
+                pq.poll();
+                pq.add(entry);
+            }
+        }
+
+        // 4. 从小根堆中取出 K 个元素
+        int[] res = new int[k];
+        int i = 0;
+        while (!pq.isEmpty()) {
+            res[i++] = pq.poll().getKey();  // 这里一定要 i++
+        }
+        return res;
+    }
+
+    // 692. 前K个高频单词
+    public List<String> topKFrequent(String[] words, int k) {
+        Map<String, Integer> map = new HashMap<>();
+        for (String word : words) {
+            map.put(word, map.getOrDefault(word, 0) + 1);
+        }
+        PriorityQueue<Map.Entry<String, Integer>> pq = new PriorityQueue<>(Comparator.comparingInt(Map.Entry::getValue));
+        for (Map.Entry<String, Integer> entry : map.entrySet()) {
+            if (pq.size() < k) {
+                pq.add(entry);
+            }else {
+                if (entry.getValue() > pq.peek().getValue()) {
+                    pq.poll();
+                    pq.add(entry);
+                }
+            }
+        }
+        List<String> res = new ArrayList<>();
+        while (!pq.isEmpty()) {
+            res.add(pq.poll().getKey());
+        }
+        Collections.reverse(res); // 因为小根堆是从低到高，取出后需要反转
+        return res;
+    }
+
 
 }
