@@ -137,4 +137,33 @@ public class StringCode {
         }
     }
 
+    // 395. 至少有K个重复字符的最长子串
+    public int longestSubstring(String s, int k) {
+        if (s == null || s.length() == 0) return 0;
+        return helper(s.toCharArray(), 0, s.length(), k);
+    }
+
+    private int helper(char[] chars, int start, int end, int k) {
+        if (end - start < k) return 0;
+        int[] count = new int[26];
+
+        for (int i = start; i < end; i++) {
+            count[chars[i] - 'a']++;
+        }
+        for (int i = start; i < end; i++) {
+            if (count[chars[i] - 'a'] < k) {
+
+                // 删除连续不合格的
+                int t = i;
+                while (t < end && count[chars[t] - 'a'] < k) {
+                    t++;
+                }
+                return Math.max(helper(chars, t, end, k), helper(chars, start, i, k));
+            }
+        }
+        return end - start;
+    }
+
+
+
 }
