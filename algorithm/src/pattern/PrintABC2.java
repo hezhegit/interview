@@ -14,11 +14,14 @@ public class PrintABC2 {
         while (true) {
             lock.lock();
             try {
-                if (number %3 == 0) {
-                    System.out.println("0-A");
-                    number++;
+                while (number %3 != 0){
+                    conditionA.await();;
                 }
+                System.out.println("0-A");
+                number++;
                 conditionB.signal();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             } finally {
                 lock.unlock();
             }
@@ -28,12 +31,16 @@ public class PrintABC2 {
     public void b() {
         while (true) {
             lock.lock();
+
             try {
-                if (number %3 == 1) {
-                    System.out.println("1-B");
-                    number++;
+                while (number %3 != 1){
+                    conditionB.await();;
                 }
+                System.out.println("1-B");
+                number++;
                 conditionC.signal();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             } finally {
                 lock.unlock();
             }
@@ -44,11 +51,14 @@ public class PrintABC2 {
         while (true) {
             lock.lock();
             try {
-                if (number %3 == 2) {
-                    System.out.println("2-C");
-                    number++;
+                while (number %3 != 2){
+                    conditionC.await();;
                 }
+                System.out.println("2-C");
+                number++;
                 conditionA.signal();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             } finally {
                 lock.unlock();
             }
